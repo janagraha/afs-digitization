@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Balance Sheet",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "periods": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "assets": {"$ref": "#/$defs/section"},
+          "equity_and_liabilities": {"$ref": "#/$defs/section"},
+          "totals": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "total_assets": {"$ref": "#/$defs/amount"},
+              "total_equity_liabilities": {"$ref": "#/$defs/amount"}
+            },
+            "required": ["total_assets", "total_equity_liabilities"]
+          }
+        },
+        "required": ["assets", "equity_and_liabilities", "totals"]
+      }
+    }
+  },
+  "required": ["periods"],
+  "$defs": {
+    "section": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"$ref": "#/$defs/line_item"}
+      }
+    },
+    "line_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {"type": "string"},
+        "label_raw": {"type": "string"},
+        "label_normalized": {"type": "string"},
+        "amount": {"$ref": "#/$defs/amount"},
+        "schedule_ref": {"type": ["string", "null"]},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+      },
+      "required": ["key", "label_raw", "label_normalized", "amount", "evidence"]
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw": {"type": "string"},
+        "value": {"type": ["number", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "parse_status": {"type": "string"},
+        "parse_warnings": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["raw", "value", "confidence", "parse_status", "parse_warnings"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {"type": "integer", "minimum": 1},
+        "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+        "source": {"type": "string"}
+      },
+      "required": ["page", "bbox", "source"]
+    }
+  }
+}
