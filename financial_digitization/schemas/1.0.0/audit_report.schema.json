@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit Report",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "opinion_type": {"type": "string", "enum": ["UNMODIFIED", "QUALIFIED", "ADVERSE", "DISCLAIMER", "AMBIGUOUS"]},
+    "firm_name": {"type": ["string", "null"]},
+    "frn": {"type": ["string", "null"]},
+    "membership_number": {"type": ["string", "null"]},
+    "signing_date": {"type": ["string", "null"]},
+    "place": {"type": ["string", "null"]},
+    "qualified_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {"type": "string"},
+          "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+        },
+        "required": ["text", "evidence"]
+      }
+    }
+  },
+  "required": ["opinion_type", "qualified_points"],
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {"type": "integer", "minimum": 1},
+        "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+        "source": {"type": "string"},
+        "text": {"type": "string"}
+      },
+      "required": ["page", "bbox", "source"]
+    }
+  }
+}

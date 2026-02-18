@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Financial Digitization Output Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0.0"},
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {"type": "string"},
+        "source_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "filename": {"type": "string"},
+              "size_bytes": {"type": "integer"},
+              "sha256": {"type": "string"},
+              "page_count": {"type": "integer"}
+            },
+            "required": ["filename", "size_bytes", "sha256", "page_count"]
+          }
+        },
+        "created_at": {"type": "string"},
+        "processed_at": {"type": ["string", "null"]}
+      },
+      "required": ["job_id", "source_files", "created_at", "processed_at"]
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ulb_name": {"type": "string"},
+        "ulb_code": {"type": "string"},
+        "state": {"type": "string"}
+      },
+      "required": ["ulb_name", "ulb_code", "state"]
+    },
+    "statement_periods": {"type": "array", "items": {"type": "string"}},
+    "source_units": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "currency": {"type": "string"},
+        "reported_unit": {"type": "string"}
+      },
+      "required": ["currency", "reported_unit"]
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "balance_sheet": {"type": "object"},
+        "income_expenditure": {"type": "object"},
+        "cash_flow": {"type": "object"},
+        "audit_report": {"type": "object"}
+      },
+      "required": ["balance_sheet", "income_expenditure", "cash_flow", "audit_report"]
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "overall": {"type": "number", "minimum": 0, "maximum": 1},
+        "by_statement": {"type": "object", "additionalProperties": {"type": "number"}}
+      },
+      "required": ["overall", "by_statement"]
+    },
+    "validation": {"type": "object"},
+    "requires_manual_review": {"type": "boolean"},
+    "review_reasons": {"type": "array", "items": {"type": "string"}},
+    "evidence_index": {"type": "object"}
+  },
+  "required": [
+    "schema_version",
+    "job",
+    "entity",
+    "statement_periods",
+    "source_units",
+    "outputs",
+    "confidence",
+    "validation",
+    "requires_manual_review",
+    "review_reasons",
+    "evidence_index"
+  ]
+}
