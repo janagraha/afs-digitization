@@ -88,3 +88,38 @@ class ETLJobRunner:
             encoding="utf-8",
         )
         return envelope
+def _collect_pdfs(input_path: Path) -> list[Path]:
+    if input_path.is_file() and input_path.suffix.lower() == ".pdf":
+        return [input_path]
+    if input_path.is_dir():
+        return sorted(input_path.glob("*.pdf"))
+    return []
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Financial digitization ETL (skeleton runner).")
+    parser.add_argument("--input", required=True, help="PDF file or folder containing PDFs")
+    parser.add_argument("--out", required=True, help="Output root folder for job artifacts")
+    args = parser.parse_args(argv)
+
+    input_path = Path(args.input)
+    output_root = Path(args.out)
+
+    pdfs = _collect_pdfs(input_path)
+    if not pdfs:
+        raise SystemExit(f"No PDFs found at: {input_path}")
+
+    runner = ETLJobRunner(output_root=output_root)
+
+    for pdf in pdfs:
+        envelope = runner.run(file_paths=[pdf], page_texts=[""])
+        job_id = envelope["job"]["job_id"]
+        print(f"OK: {pdf.name} -> {output_root / job_id}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
