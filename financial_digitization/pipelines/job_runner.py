@@ -6,27 +6,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from financial_digitization.exporters.excel_writer import write_excel
 from financial_digitization.mappers.semantic_mapper import SemanticMapper
 from financial_digitization.normalizers.numeric import parse_amount
 from financial_digitization.pipelines.classifier import classify_document
 from financial_digitization.validators.financial_rules import FinancialValidator, summarize_findings
-
-
-def _build_excel_rows(source_file: dict[str, object], classification: dict[str, object], validation: dict[str, object]) -> list[list[object]]:
-    rows: list[list[object]] = [
-        ["filename", source_file["filename"]],
-        ["sha256", source_file["sha256"]],
-        ["size_bytes", source_file["size_bytes"]],
-        ["page_count", source_file["page_count"]],
-        ["validation_status", validation["validation_status"]],
-        ["requires_manual_review", validation["requires_manual_review"] or classification["requires_manual_review"]],
-        [],
-        ["page", "section", "confidence", "signals"],
-    ]
-    for item in classification["page_map"]:
-        rows.append([item["page"], item["section"], item["confidence"], ", ".join(item["signals"])])
-    return rows
 
 
 class ETLJobRunner:
@@ -100,14 +83,43 @@ class ETLJobRunner:
 
         (job_dir / "mapped_canonical.json").write_text(json.dumps(envelope, indent=2), encoding="utf-8")
         (job_dir / "validation_report.json").write_text(json.dumps(validation, indent=2), encoding="utf-8")
-
-        for source_file in source_files:
-            excel_rows = _build_excel_rows(source_file, classification, validation)
-            excel_name = f"{Path(str(source_file['filename'])).stem}.xlsx"
-            write_excel(job_dir / excel_name, excel_rows)
-
         (job_dir / "job_log.jsonl").write_text(
             json.dumps({"event": "job_completed", "job_id": job_id, "timestamp": datetime.now(timezone.utc).isoformat()}) + "\n",
             encoding="utf-8",
         )
         return envelope
+def _collect_pdfs(input_path: Path) -> list[Path]:
+    if input_path.is_file() and input_path.suffix.lower() == ".pdf":
+        return [input_path]
+    if input_path.is_dir():
+        return sorted(input_path.glob("*.pdf"))
+    return []
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Financial digitization ETL (skeleton runner).")
+    parser.add_argument("--input", required=True, help="PDF file or folder containing PDFs")
+    parser.add_argument("--out", required=True, help="Output root folder for job artifacts")
+    args = parser.parse_args(argv)
+
+    input_path = Path(args.input)
+    output_root = Path(args.out)
+
+    pdfs = _collect_pdfs(input_path)
+    if not pdfs:
+        raise SystemExit(f"No PDFs found at: {input_path}")
+
+    runner = ETLJobRunner(output_root=output_root)
+
+    for pdf in pdfs:
+        envelope = runner.run(file_paths=[pdf], page_texts=[""])
+        job_id = envelope["job"]["job_id"]
+        print(f"OK: {pdf.name} -> {output_root / job_id}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

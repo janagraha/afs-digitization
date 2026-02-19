@@ -1,3 +1,13 @@
+Metadata-Version: 2.4
+Name: financial-digitization
+Version: 0.1.0
+Summary: Deterministic ETL pipeline for financial statement digitization
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: jsonschema>=4.20
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+
 # Financial Statement Digitization ETL (Deterministic + Auditable)
 
 This repository provides a production-oriented scaffold for digitizing financial statements from PDF/paper sources into a canonical, validated JSON output.
