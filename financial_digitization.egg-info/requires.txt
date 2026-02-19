@@ -1,4 +1,5 @@
 jsonschema>=4.20
+pypdf>=4.2
 
 [dev]
 pytest>=8.0

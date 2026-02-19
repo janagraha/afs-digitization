@@ -38,3 +38,10 @@ pytest
 - Add schedule reference detection and linking engine.
 - Add auditor report NLP parser with evidence blocks.
 - Add persistent job store, retries, DLQ, and metrics.
+
+
+## Run local upload web page
+```bash
+python web_digitizer.py --host 127.0.0.1 --port 8080
+```
+Open `http://127.0.0.1:8080`, upload a PDF, and the digitized Excel file will download automatically.
