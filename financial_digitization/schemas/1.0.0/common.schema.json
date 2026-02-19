@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "title": "Common Definitions",
+  "type": "object",
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {"type": "integer", "minimum": 1},
+        "bbox": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "source": {"type": "string", "enum": ["pdf_text", "ocr", "derived"]},
+        "text": {"type": "string"}
+      },
+      "required": ["page", "bbox", "source"]
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw": {"type": "string"},
+        "value": {"type": ["number", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "parse_status": {"type": "string", "enum": ["parsed", "blank", "invalid"]},
+        "parse_warnings": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["raw", "value", "confidence", "parse_status", "parse_warnings"]
+    }
+  }
+}
